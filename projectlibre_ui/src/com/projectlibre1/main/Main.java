@@ -70,12 +70,11 @@ import com.projectlibre1.util.Environment;
  *
  */
 public class Main {
-	public static void main(String[] args) { 
+	public static void main(String[] args) {
 		int runNumber=getRunNumber()+1;
 		long firstRun=getFirstRun();
 		Preferences.userNodeForPackage(Main.class).putInt("projectlibreRunNumber",runNumber);
-		Preferences.userNodeForPackage(Main.class).putLong("projectlibrefirstRun",firstRun);
-		System.out.println("Hello Wordl!!!");
+		Preferences.userNodeForPackage(Main.class).putLong("projectlibrefirstRun",firstRun);		
 		System.setProperty("projectlibre.runNumber", runNumber+"");
 		System.setProperty("projectlibre.firstRun", firstRun+"");
 		System.setProperty("projectlibre.projectLibreRunNumber", getProjectLibreRunNumber()+"");
