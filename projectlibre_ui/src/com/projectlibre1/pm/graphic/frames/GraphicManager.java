@@ -137,8 +137,10 @@ import com.projectlibre1.contrib.ClassLoaderUtils;
 import com.projectlibre1.dialog.AboutDialog;
 import com.projectlibre1.dialog.AbstractDialog;
 import com.projectlibre1.dialog.BaselineDialog;
+import com.projectlibre1.dialog.ExportBitrixDialog;
 import com.projectlibre1.dialog.FindDialog;
 import com.projectlibre1.dialog.HelpDialog;
+import com.projectlibre1.dialog.ImportBitrixDialog;
 import com.projectlibre1.dialog.OpenProjectDialog;
 import com.projectlibre1.dialog.ProjectDialog;
 import com.projectlibre1.dialog.ProjectInformationDialog;
@@ -985,6 +987,8 @@ public class GraphicManager implements  FrameHolder, NamedFrameListener, WindowS
 
 	public void addHandlers() {
 		actionsMap = new MenuActionsMap(this,menuManager);
+		actionsMap.addHandler(ACTION_IMPORT_BITRIX_PROJECT, new ImportBitrixProjectAction());
+		actionsMap.addHandler(ACTION_EXPORT_BITRIX_PROJECT, new ExportBitrixProjectAction());
 		actionsMap.addHandler(ACTION_NEW_PROJECT, new NewProjectAction());
 		actionsMap.addHandler(ACTION_OPEN_PROJECT, new OpenProjectAction());
 		actionsMap.addHandler(ACTION_INSERT_PROJECT, new InsertProjectAction());
@@ -1070,6 +1074,30 @@ public class GraphicManager implements  FrameHolder, NamedFrameListener, WindowS
 		actionsMap.addHandler(ACTION_REFRESH, new RefreshAction());
 
 
+	}
+	
+	public class ExportBitrixProjectAction extends MenuActionsMap.GlobalMenuAction {
+		private static final long serialVersionUID = 1L;
+		public void actionPerformed(ActionEvent arg0) {
+			setMeAsLastGraphicManager();
+			doNewExportBitrixDialog();
+		}
+		protected boolean allowed(boolean enable){
+			DocumentFrame dframe = getCurrentFrame();
+			return dframe == null || !dframe.isEditingResourcePool();
+		}
+	}
+	
+	public class ImportBitrixProjectAction extends MenuActionsMap.GlobalMenuAction {
+		private static final long serialVersionUID = 1L;
+		public void actionPerformed(ActionEvent arg0) {
+			setMeAsLastGraphicManager();
+			doNewImportBitrixDialog();
+		}
+		protected boolean allowed(boolean enable){
+			DocumentFrame dframe = getCurrentFrame();
+			return dframe == null || !dframe.isEditingResourcePool();
+		}
 	}
 
 	public class NewProjectAction extends MenuActionsMap.GlobalMenuAction {
@@ -1783,7 +1811,38 @@ public class GraphicManager implements  FrameHolder, NamedFrameListener, WindowS
 	        combo.transformBasedOnValue();
 		}
 	}
-
+	
+	public boolean doNewImportBitrixDialog() {
+		ImportBitrixDialog.Form form=doNewImportBitrixDialog1();
+		//if (form==null) return false;
+		//else return doNewProjectDialog2(form);
+		return false;
+	}
+	public ImportBitrixDialog.Form doNewImportBitrixDialog1() {
+		//addHistory("doNewProjectDialog");
+		finishAnyOperations();
+		ImportBitrixDialog bitrixDialog = ImportBitrixDialog.getInstance(getFrame(),null);
+		//bitrixDialog.getForm().setManager(Environment.getUser().getName());
+		if (!bitrixDialog.doModal())
+			return null; // if cancelled
+		return bitrixDialog.getForm();
+	}
+	
+	public boolean doNewExportBitrixDialog() {
+		ExportBitrixDialog.Form form=doNewExportBitrixDialog1();
+		//if (form==null) return false;
+		//else return doNewProjectDialog2(form);
+		return false;
+	}
+	public ExportBitrixDialog.Form doNewExportBitrixDialog1() {
+		//addHistory("doNewProjectDialog");
+		finishAnyOperations();
+		ExportBitrixDialog bitrixDialog = ExportBitrixDialog.getInstance(getFrame(),null);
+		//bitrixDialog.getForm().setManager(Environment.getUser().getName());
+		if (!bitrixDialog.doModal())
+			return null; // if cancelled
+		return bitrixDialog.getForm();
+	}
 
 	public void closeApplication(){
 		addHistory("closeApplication");

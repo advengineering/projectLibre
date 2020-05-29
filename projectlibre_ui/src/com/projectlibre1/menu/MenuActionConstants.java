@@ -56,6 +56,8 @@
 package com.projectlibre1.menu;
 
 public interface MenuActionConstants {
+	public static final String ACTION_IMPORT_BITRIX_PROJECT   = "ImportBitrixProject";
+	public static final String ACTION_EXPORT_BITRIX_PROJECT   = "ExportBitrixProject";
 	public static final String ACTION_NEW_PROJECT             = "NewProject";
 	public static final String ACTION_OPEN_PROJECT            = "OpenProject";
 	public static final String ACTION_IMPORT_MSPROJECT        = "ImportMSProject";
