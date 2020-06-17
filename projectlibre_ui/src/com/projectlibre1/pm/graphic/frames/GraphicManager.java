@@ -129,6 +129,7 @@ import org.pushingpixels.flamingo.api.ribbon.JRibbonFrame;
 import org.pushingpixels.flamingo.api.ribbon.RibbonApplicationMenu;
 import org.pushingpixels.flamingo.api.ribbon.RibbonTask;
 
+import com.advengineering.bitriximport.ImportBitrixDialog;
 import com.projectlibre.ui.ribbon.CustomRibbonBandGenerator;
 import com.projectlibre.ui.ribbon.ProjectLibreRibbonUI;
 import com.projectlibre1.configuration.Configuration;
@@ -140,7 +141,6 @@ import com.projectlibre1.dialog.BaselineDialog;
 import com.projectlibre1.dialog.ExportBitrixDialog;
 import com.projectlibre1.dialog.FindDialog;
 import com.projectlibre1.dialog.HelpDialog;
-import com.projectlibre1.dialog.ImportBitrixDialog;
 import com.projectlibre1.dialog.OpenProjectDialog;
 import com.projectlibre1.dialog.ProjectDialog;
 import com.projectlibre1.dialog.ProjectInformationDialog;
@@ -249,6 +249,7 @@ public class GraphicManager implements  FrameHolder, NamedFrameListener, WindowS
     private HelpDialog helpDialog = null;
     private BaselineDialog baselineDialog = null;
     private ResourceMappingDialog resourceMappingDialog=null;
+    private ImportBitrixDialog importBitrixDialog = null;
 	ProjectFactory projectFactory = null;
 	protected Container container;
 	protected Frame frame;
@@ -1812,36 +1813,20 @@ public class GraphicManager implements  FrameHolder, NamedFrameListener, WindowS
 		}
 	}
 	
-	public boolean doNewImportBitrixDialog() {
-		ImportBitrixDialog.Form form=doNewImportBitrixDialog1();
-		//if (form==null) return false;
-		//else return doNewProjectDialog2(form);
-		return false;
-	}
-	public ImportBitrixDialog.Form doNewImportBitrixDialog1() {
-		//addHistory("doNewProjectDialog");
-		finishAnyOperations();
-		ImportBitrixDialog bitrixDialog = ImportBitrixDialog.getInstance(getFrame(),null);
-		//bitrixDialog.getForm().setManager(Environment.getUser().getName());
-		if (!bitrixDialog.doModal())
-			return null; // if cancelled
-		return bitrixDialog.getForm();
+	public void doNewImportBitrixDialog() {
+		if (importBitrixDialog == null) {
+			importBitrixDialog = com.advengineering.bitriximport.ImportBitrixDialog.getInstance(getFrame());
+			importBitrixDialog.pack();
+			importBitrixDialog.setModal(true);
+    	} else
+    		importBitrixDialog.updateWorkers();
+		importBitrixDialog.setLocationRelativeTo(getFrame());//to center on screen
+		importBitrixDialog.setVisible(true);
 	}
 	
-	public boolean doNewExportBitrixDialog() {
-		ExportBitrixDialog.Form form=doNewExportBitrixDialog1();
-		//if (form==null) return false;
-		//else return doNewProjectDialog2(form);
-		return false;
-	}
-	public ExportBitrixDialog.Form doNewExportBitrixDialog1() {
-		//addHistory("doNewProjectDialog");
-		finishAnyOperations();
-		ExportBitrixDialog bitrixDialog = ExportBitrixDialog.getInstance(getFrame(),null);
-		//bitrixDialog.getForm().setManager(Environment.getUser().getName());
-		if (!bitrixDialog.doModal())
-			return null; // if cancelled
-		return bitrixDialog.getForm();
+	//implement to export
+	public void doNewExportBitrixDialog() {
+		
 	}
 
 	public void closeApplication(){
