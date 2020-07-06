@@ -18,12 +18,5 @@
 	<classpathentry kind="lib" path="/projectlibre_contrib/lib/jcommon.jar"/>
 	<classpathentry kind="lib" path="/projectlibre_contrib/lib/commons-beanutils.jar"/>
 	<classpathentry kind="lib" path="/projectlibre_contrib/lib/l2fprod-common-totd.jar"/>
-	<classpathentry kind="lib" path="/projectLibre/projectlibre_contrib/lib/json-simple-1.1.1.jar"/>
-	<classpathentry kind="lib" path="/projectLibre/projectlibre_contrib/lib/httpmime-4.2.5.jar"/>
-	<classpathentry kind="lib" path="/projectLibre/projectlibre_contrib/lib/httpcore-4.2.4.jar"/>
-	<classpathentry kind="lib" path="/projectLibre/projectlibre_contrib/lib/httpclient-cache-4.2.5.jar"/>
-	<classpathentry kind="lib" path="/projectLibre/projectlibre_contrib/lib/httpclient-4.5.2.jar"/>
-	<classpathentry kind="lib" path="/projectLibre/projectlibre_contrib/lib/commons-logging-1.1.1.jar"/>
-	<classpathentry kind="lib" path="/projectLibre/projectlibre_contrib/lib/commons-codec-1.6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
