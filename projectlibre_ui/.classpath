@@ -18,5 +18,7 @@
 	<classpathentry kind="lib" path="/projectlibre_contrib/lib/jcommon.jar"/>
 	<classpathentry kind="lib" path="/projectlibre_contrib/lib/commons-beanutils.jar"/>
 	<classpathentry kind="lib" path="/projectlibre_contrib/lib/l2fprod-common-totd.jar"/>
+	<classpathentry kind="lib" path="/projectlibre_contrib/lib/commons-io-2.6.jar"/>
+	<classpathentry kind="lib" path="/projectlibre_contrib/lib/gson-2.8.6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -1,6 +1,7 @@
 package com.advengineering.bitriximport;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,6 +16,8 @@ import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.KeyStroke;
 
+import com.advengineering.bitriximport.rest.client.RestClient;
+import com.advengineering.bitriximport.rest.model.Worker;
 import com.projectlibre1.dialog.AbstractDialog;
 import com.projectlibre1.dialog.ButtonPanel;
 import com.projectlibre1.strings.Messages;
@@ -23,13 +26,24 @@ public class ImportBitrixDialog extends AbstractDialog {
 
 	private JButton all;
 	private JButton upLevel;
+	private JButton options;
 	private JPanel centerPane;
 	private CheckboxList workerList;
 
 	private static final long serialVersionUID = 1L;
+	
+	private static ImportBitrixDialog instance;
 
+	private ImportBitrixDialog() {}
+	
 	public static ImportBitrixDialog getInstance(Frame owner) {
-		return new ImportBitrixDialog(owner);
+		if(instance==null)
+			instance = new ImportBitrixDialog(owner);
+		return instance;
+	}
+	
+	public static ImportBitrixDialog getInstance() {
+		return instance;
 	}
 
 	private ImportBitrixDialog(Frame owner) {
@@ -83,16 +97,41 @@ public class ImportBitrixDialog extends AbstractDialog {
 				onCancel();
 			}
 		});
+		options = new JButton(Messages.getString("ImportBitrixDialog.options"));
+		options.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				RestClient.doNewRestConfigDialog();
+			}
+		});
 		ButtonPanel buttonPanel = new ButtonPanel();
 		buttonPanel.addButton(all);
 		buttonPanel.addButton(upLevel);
+		buttonPanel.addButton(options);
 		buttonPanel.addButton(cancel);
 		return buttonPanel;
 	}
 
 	// implement to load workers from bitrix
 	public void updateWorkers() {
-		prepareTestCheckboxListPane();
+		List<Worker> workers = RestClient.getWorkers();
+		if (workers == null) {
+			centerPane.removeAll();
+			setSize(new Dimension(500, 80));
+			return;
+		} else {
+			workerList = new CheckboxList(workers) {
+				@Override
+				public Object getDataLabel(Object data) {
+					Worker a = (Worker) data;
+					return a.getLAST_NAME() + " " + a.getNAME() + " " + a.getSECOND_NAME();
+				}
+			};
+			centerPane.removeAll();
+			centerPane.add(workerList, BorderLayout.CENTER);
+		}
+		setSize(new Dimension(500, 500));
+		centerPane.setVisible(false);
+		centerPane.setVisible(true);
 	}
 
 	// implement load project from bitrix
@@ -107,32 +146,6 @@ public class ImportBitrixDialog extends AbstractDialog {
 		testButActionPerformed(e);
 	}
 
-	// test var to remove
-	private int i = 50;
-
-	// test list to remove
-	private void prepareTestCheckboxListPane() {
-		Worker worker = new Worker();
-		worker.setTitle("Петров В.А." + this.i);
-		worker.setPrice(20.5);
-		List workers = new ArrayList<Worker>();
-		int i = 0;
-		while (i < this.i) {
-			workers.add(worker);
-			i++;
-		}
-		workerList = new CheckboxList(workers) {
-			@Override
-			public Object getDataLabel(Object data) {
-				Worker a = (Worker) data;
-				return a.getTitle();
-			}
-		};
-		centerPane.removeAll();
-		centerPane.add(workerList, BorderLayout.CENTER);
-		this.i = this.i + 10;
-	}
-
 	// test listener to remove
 	private void testButActionPerformed(java.awt.event.ActionEvent evt) {
 		ArrayList as = workerList.getSelectedData();
@@ -145,7 +158,7 @@ public class ImportBitrixDialog extends AbstractDialog {
 			sub.append("<ul>");
 			for (Object o : as) {
 				Worker b = (Worker) o;
-				sub.append("<li>" + b.getTitle() + ", " + b.getPrice() + "</li>");
+				sub.append("<li>" + b.getSECOND_NAME() + ", " + b.getID() + "</li>");
 			}
 			sub.append("</ul>");
 			sub.append("</html>");
