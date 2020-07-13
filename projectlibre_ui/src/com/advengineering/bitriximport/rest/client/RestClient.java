@@ -120,14 +120,11 @@ public class RestClient {
 		} catch (IOException ex) {}
 		return null;
 	}
-	
-	/*public static ArrayList<Worker> getTasks() {
-		
-	}*/
-	
 
 	public static void testConnection(java.awt.event.ActionEvent evt, String token) {
 		token = token.trim().replace("profile", "");
+		if(!token.endsWith("/"))
+			testButActionPerformed(evt, null);
 		try {
 			HttpURLConnection con = (HttpURLConnection) new URL(token + "/profile").openConnection();
 			con.setRequestMethod("GET");
