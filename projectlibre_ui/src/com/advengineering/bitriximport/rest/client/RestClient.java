@@ -51,7 +51,7 @@ public class RestClient {
 	}
 
 	public static void setProperties(String token) {
-		TOKEN = token.trim().replace("/profile", "");
+		TOKEN = token.trim().replace("profile", "");
 		try {
 			properties.put("TOKEN", TOKEN);
 			OutputStream out = new FileOutputStream(getFileProperties());
@@ -121,9 +121,13 @@ public class RestClient {
 		return null;
 	}
 	
+	/*public static ArrayList<Worker> getTasks() {
+		
+	}*/
+	
 
 	public static void testConnection(java.awt.event.ActionEvent evt, String token) {
-		token = token.trim().replace("/profile", "");
+		token = token.trim().replace("profile", "");
 		try {
 			HttpURLConnection con = (HttpURLConnection) new URL(token + "/profile").openConnection();
 			con.setRequestMethod("GET");
