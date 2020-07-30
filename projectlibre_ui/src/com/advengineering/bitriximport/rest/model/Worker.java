@@ -2,34 +2,34 @@ package com.advengineering.bitriximport.rest.model;
 
 public class Worker {
 	
-	private Integer ID;
-	private String NAME;
-	private String LAST_NAME;
-	private String SECOND_NAME;
+	private Integer id;
+	private String name;
+	private String lastName;
+	private String secondName;
 	
-	public Integer getID() {
-		return ID;
+	public Integer getId() {
+		return id;
 	}
-	public void setID(Integer iD) {
-		ID = iD;
+	public void setId(Integer id) {
+		this.id = id;
 	}
-	public String getNAME() {
-		return NAME;
+	public String getName() {
+		return name;
 	}
-	public void setNAME(String nAME) {
-		NAME = nAME;
+	public void setName(String name) {
+		this.name = name;
 	}
-	public String getLAST_NAME() {
-		return LAST_NAME;
+	public String getLastName() {
+		return lastName;
 	}
-	public void setLAST_NAME(String lAST_NAME) {
-		LAST_NAME = lAST_NAME;
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
 	}
-	public String getSECOND_NAME() {
-		return SECOND_NAME;
+	public String getSecondName() {
+		return secondName;
 	}
-	public void setSECOND_NAME(String sECOND_NAME) {
-		SECOND_NAME = sECOND_NAME;
+	public void setSecondName(String secondName) {
+		this.secondName = secondName;
 	}
 
 }

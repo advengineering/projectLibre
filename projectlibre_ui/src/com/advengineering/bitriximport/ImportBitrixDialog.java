@@ -100,7 +100,7 @@ public class ImportBitrixDialog extends AbstractDialog {
 		options = new JButton(Messages.getString("ImportBitrixDialog.options"));
 		options.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				RestClient.doNewRestConfigDialog();
+				RestClient.getInstance().doNewRestConfigDialog();
 			}
 		});
 		ButtonPanel buttonPanel = new ButtonPanel();
@@ -113,7 +113,7 @@ public class ImportBitrixDialog extends AbstractDialog {
 
 	// implement to load workers from bitrix
 	public void updateWorkers() {
-		List<Worker> workers = RestClient.getWorkers();
+		List<Worker> workers = RestClient.getInstance().getWorkers();
 		if (workers == null) {
 			centerPane.removeAll();
 			setSize(new Dimension(500, 80));
@@ -123,7 +123,7 @@ public class ImportBitrixDialog extends AbstractDialog {
 				@Override
 				public Object getDataLabel(Object data) {
 					Worker a = (Worker) data;
-					return a.getLAST_NAME() + " " + a.getNAME() + " " + a.getSECOND_NAME();
+					return a.getLastName() + " " + a.getName() + " " + a.getSecondName();
 				}
 			};
 			centerPane.removeAll();
@@ -158,7 +158,7 @@ public class ImportBitrixDialog extends AbstractDialog {
 			sub.append("<ul>");
 			for (Object o : as) {
 				Worker b = (Worker) o;
-				sub.append("<li>" + b.getSECOND_NAME() + ", " + b.getID() + "</li>");
+				sub.append("<li>" + b.getSecondName() + ", " + b.getId() + "</li>");
 			}
 			sub.append("</ul>");
 			sub.append("</html>");

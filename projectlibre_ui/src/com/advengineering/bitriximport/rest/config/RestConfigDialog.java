@@ -53,6 +53,7 @@ public class RestConfigDialog extends AbstractDialog{
 	}
 
 	protected void onCancel() {
+		token.setText(RestClient.getInstance().getToken());
 		setVisible(false);
 	}
 
@@ -62,7 +63,7 @@ public class RestConfigDialog extends AbstractDialog{
 		centerPane.setBorder(new EmptyBorder(10, 10, 10, 10));
 		info = new JLabel(Messages.getString("RestConfigDialog.info"));
 		token = new JTextField();
-		token.setText(RestClient.TOKEN);
+		token.setText(RestClient.getInstance().getToken());
 		ImageIcon icon = IconManager.getIcon("export.config");
 		JLabel help = new JLabel(icon);
 		help.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -78,7 +79,7 @@ public class RestConfigDialog extends AbstractDialog{
 		ok.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				RestClient.setProperties(token.getText());
+				RestClient.getInstance().setToken(token.getText());
 				ImportBitrixDialog.getInstance().updateWorkers();
 				onCancel();
 			}
@@ -92,7 +93,7 @@ public class RestConfigDialog extends AbstractDialog{
 		test = new JButton(Messages.getString("RestConfigDialog.test"));
 		test.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				RestClient.testConnection(e, token.getText());
+				RestClient.getInstance().testConnection(e, token.getText());
 			}
 		});
 		ButtonPanel buttonPanel = new ButtonPanel();
