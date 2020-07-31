@@ -130,8 +130,8 @@ public class RestClient {
 			}
 			String response = IOUtils.toString(con.getInputStream(), "UTF-8").toLowerCase();
 			con.getInputStream().close();
-			Worker worker = ((ResultOne<Worker>) usersGson.fromJson(response, new TypeToken<ResultOne<Worker>>() 
-			{}.getType())).result;
+			Worker worker = ((ResultOne<Worker>) usersGson
+					.fromJson(response, new TypeToken<ResultOne<Worker>>() {}.getType())).result;
 			testButActionPerformed(evt, worker);
 			return;
 		} catch (Exception ex) {}
@@ -140,7 +140,8 @@ public class RestClient {
 	
 	private void testButActionPerformed(java.awt.event.ActionEvent evt, Worker worker) {
 		if (worker==null) {
-			JOptionPane.showMessageDialog(restConfigDialog, "Ошибка соединения!", "Тест соединения", JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(restConfigDialog, "Ошибка соединения!",
+					"Тест соединения", JOptionPane.INFORMATION_MESSAGE);
 		} else {
 			StringBuffer sub = new StringBuffer();
 			sub.append("<html>");
