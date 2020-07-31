@@ -9,16 +9,19 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
 import javax.swing.JOptionPane;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.NameValuePair;
+import org.apache.http.HttpHeaders;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 
 import com.advengineering.bitriximport.rest.config.RestConfigDialog;
 import com.advengineering.bitriximport.rest.model.ResultOne;
@@ -38,6 +41,11 @@ public class RestClient {
 	private final String CONFIG_FILE = "com/advengineering/bitriximport/rest/config/bitrix.ini";
 	private final Properties properties = new Properties();
 	private final ClassLoader classLoader = ClassLoaderUtils.getLocalClassLoader();
+	private final Gson usersGson = new GsonBuilder()
+		    .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+		    .create();
+	private final Gson commonGson = new Gson();
+	
 	
 	private RestConfigDialog restConfigDialog = null;
 
@@ -92,53 +100,9 @@ public class RestClient {
 	public List<Worker> getWorkers() {
 		if(token==null)
 			return null;
-		ArrayList<Worker> workers;
-		try {
-			HttpURLConnection con = (HttpURLConnection) new URL(token + "user.get.json").openConnection();
-			con.setRequestMethod("GET");
-
-			int responseCode = con.getResponseCode();
-			if (responseCode != 200) {
-				return null;
-			}
-
-			String response = IOUtils.toString(con.getInputStream(), "UTF-8").toLowerCase();
-			
-			String totalStr = "0";
-			int index = 8;
-			while(totalStr.matches("[-+]?\\d+")) {
-				totalStr = response.substring(response.indexOf("total") + 7, response.indexOf("total") + index);
-				index++;
-			}
-			int totalInt = Integer.parseInt(totalStr.substring(0, totalStr.length()-1));	
-			con.getInputStream().close();
-			Gson gson = new GsonBuilder()
-				    .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-				    .create();
-			workers = ((ResultOne<ArrayList<Worker>>) gson.fromJson(response,
-					new TypeToken<ResultOne<ArrayList<Worker>>>() {}.getType())).result;
-			index = 50;
-			while(totalInt > index) {
-				con = (HttpURLConnection) new URL(token + "user.get.json?start=" + index).openConnection();
-				con.setRequestMethod("GET");
-
-				responseCode = con.getResponseCode();
-				if (responseCode != 200) {
-					return workers;
-				}
-
-				response = IOUtils.toString(con.getInputStream(), "UTF-8");
-				con.getInputStream().close();
-				workers.addAll(((ResultOne<ArrayList<Worker>>) new Gson().fromJson(response,
-						new TypeToken<ResultOne<ArrayList<Worker>>>() {}.getType())).result);
-				index += 50;
-			}
-			return workers;
-			
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
-		return null;
+		List<Worker> workers = new ArrayList<>();
+		getInstanses(workers, Worker[].class, token.concat("user.get.json"), "GET", null, null, usersGson, 0, 0);
+		return workers.size() == 0 ? null : workers;
 	}
 	
 	public List<Task> getTasks(int id){
@@ -164,9 +128,9 @@ public class RestClient {
 				testButActionPerformed(evt, null);
 				return;
 			}
-			String response = IOUtils.toString(con.getInputStream(), "UTF-8");
+			String response = IOUtils.toString(con.getInputStream(), "UTF-8").toLowerCase();
 			con.getInputStream().close();
-			Worker worker = ((ResultOne<Worker>) new Gson().fromJson(response, new TypeToken<ResultOne<Worker>>() 
+			Worker worker = ((ResultOne<Worker>) usersGson.fromJson(response, new TypeToken<ResultOne<Worker>>() 
 			{}.getType())).result;
 			testButActionPerformed(evt, worker);
 			return;
@@ -181,9 +145,46 @@ public class RestClient {
 			StringBuffer sub = new StringBuffer();
 			sub.append("<html>");
 			sub.append("<b>Соединение успешно:</b><br>");
-			sub.append("<p>" + worker.getLastName() + " " + worker.getName() +  " " + worker.getSecondName() + "</p>");
+			sub.append("<p>" + worker.getName() + " " + worker.getLastName() + "</p>");
 			sub.append("</html>");
 			JOptionPane.showMessageDialog(restConfigDialog, sub.toString(), "Тест соединения", JOptionPane.INFORMATION_MESSAGE);
 		}
+	}
+	
+
+	public <T> void getInstanses (List<T> list,  Class<T[]> clazz, String url, String method, 
+			Object body, HttpHeaders headers, Gson gson, int index, int total) {
+		if(method.equals("GET")) {
+			HttpGet request = new HttpGet(url);
+			try (CloseableHttpResponse response = httpClient.execute(request)) {
+				if(response.getStatusLine().getStatusCode() != 200)
+					return;
+				String entity = EntityUtils.toString(response.getEntity()).toLowerCase();
+				if(total == 0)
+					total = findTotalCounts(entity);
+				entity = entity.substring(entity.indexOf("["), entity.lastIndexOf("]") + 1);
+				list.addAll(Arrays.asList(gson.fromJson(entity, clazz)));
+				index += 50;
+				if(total > index) {
+					if(url.indexOf("?start=") != -1)
+						url = url.substring(0, url.lastIndexOf(String.valueOf(index - 50)));
+					else
+						url = url + "?start=";
+					getInstanses(list, clazz, url + index, method, body, headers, gson, index, total);
+				}
+	        } catch (Exception e) {
+	        	e.printStackTrace();
+	        }
+		}
+	}
+	
+	private int findTotalCounts(String entity) {
+		String totalStr = "0";
+		int index = 8;
+		while(totalStr.matches("[-+]?\\d+")) {
+			totalStr = entity.substring(entity.indexOf("total") + 7, entity.indexOf("total") + index);
+			index++;
+		}
+		return Integer.parseInt(totalStr.substring(0, totalStr.length()-1));
 	}
 }
