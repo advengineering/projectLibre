@@ -17,6 +17,7 @@ import javax.swing.JRootPane;
 import javax.swing.KeyStroke;
 
 import com.advengineering.bitriximport.rest.client.RestClient;
+import com.advengineering.bitriximport.rest.model.Task;
 import com.advengineering.bitriximport.rest.model.Worker;
 import com.projectlibre1.dialog.AbstractDialog;
 import com.projectlibre1.dialog.ButtonPanel;
@@ -136,14 +137,44 @@ public class ImportBitrixDialog extends AbstractDialog {
 
 	// implement load project from bitrix
 	public void loadAll(ActionEvent e) {
-		// only for test
-		testButActionPerformed(e);
+		List<Integer> result = getIdselected();
+		if(result == null)
+			return;
+		List<Task> tasks = new ArrayList<>();
+		result.forEach(item -> { 
+			List<Task> testTask = RestClient.getInstance().getTasks(item);
+			if(testTask != null)
+				tasks.addAll(testTask);
+			});
+		if(tasks.isEmpty())
+			//TODO - place in resource bundle
+			JOptionPane.showMessageDialog(this, "Задач не найдено!", "Информация", JOptionPane.INFORMATION_MESSAGE);
+		//only for demonstration (remove this)
+		else {
+			StringBuilder info = new StringBuilder();
+			tasks.forEach(task -> info.append(task).append("\n"));
+			JOptionPane.showMessageDialog(this, info.toString(), "Информация", JOptionPane.INFORMATION_MESSAGE);
+		}
+			
 	}
 
 	// implement load project from bitrix
 	public void loadLevelUp(ActionEvent e) {
 		// only for test
 		testButActionPerformed(e);
+	}
+	
+	private List<Integer> getIdselected(){
+		ArrayList selectedWorkers = workerList.getSelectedData();
+		if (selectedWorkers.isEmpty())
+			//TODO - place in resource bundle
+			JOptionPane.showMessageDialog(this, "Выберите сотрудников!", "Информация", JOptionPane.INFORMATION_MESSAGE);
+		else {
+			List<Integer> result = new ArrayList<>();
+			selectedWorkers.forEach(item -> result.add(((Worker) item).getId()));
+			return result;
+		}
+		return null;
 	}
 
 	// test listener to remove

@@ -12,13 +12,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import javax.swing.JOptionPane;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpHeaders;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -41,11 +45,11 @@ public class RestClient {
 	private final String CONFIG_FILE = "com/advengineering/bitriximport/rest/config/bitrix.ini";
 	private final Properties properties = new Properties();
 	private final ClassLoader classLoader = ClassLoaderUtils.getLocalClassLoader();
+	
 	private final Gson usersGson = new GsonBuilder()
 		    .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
 		    .create();
 	private final Gson commonGson = new Gson();
-	
 	
 	private RestConfigDialog restConfigDialog = null;
 
@@ -101,19 +105,77 @@ public class RestClient {
 		if(token==null)
 			return null;
 		List<Worker> workers = new ArrayList<>();
-		getInstanses(workers, Worker[].class, token.concat("user.get.json"), "GET", null, null, usersGson, 0, 0);
-		return workers.size() == 0 ? null : workers;
+		getInstanses(workers, Worker[].class, token.concat("user.get.json"), "GET",
+				null, usersGson, 0, 0);
+		return workers.size() == 0 ? null : workers.stream()
+			.sorted((o1, o2) -> o1.getLastName().compareTo(o2.getLastName()))
+			.collect(Collectors.toList());
 	}
 	
 	public List<Task> getTasks(int id){
-		 /*List<NameValuePair> urlParameters = new ArrayList();
-		 NameValuePair select = new 
-	     urlParameters.add(new BasicNameValuePair("username", "abc"));
-	     urlParameters.add(new BasicNameValuePair("password", "123"));
-	     urlParameters.add(new BasicNameValuePair("custom", "secret"));*/
-		return null;
+		
+		String jsonTasks = "{\"select\":[\"ID\",\"PARENT_ID\",\"TITLE\","
+				+ "\"DESCRIPTION\",\"START_DATE_PLAN\",\"CREATED_DATE\",\"END_DATE_PLAN\"," 
+				+ "\"DEADLINE\",\"RESPONSIBLE_ID\",\"ACCOMPLICES\",\"STATUS\"],"
+				+ "\"filter\":[{\"STATUS\":[\"1\",\"2\",\"3\",\"4\",\"6\"]},";
+		 
+		StringEntity jsonTasksResponsible = new StringEntity(jsonTasks + "{\"RESPONSIBLE_ID\":\"" 
+				+ id + "\"}]}", ContentType.APPLICATION_JSON);
+		
+		StringEntity jsonTasksAccomplice = new StringEntity(jsonTasks + "{\"ACCOMPLICE\":\"" 
+				+ id + "\"}]}", ContentType.APPLICATION_JSON);
+		
+	     List<Task> tasks = new ArrayList<Task>();
+	     getInstanses(tasks, Task[].class, token.concat("tasks.task.list"), "POST",
+	    		 jsonTasksResponsible, commonGson, 0, 0);
+	     getInstanses(tasks, Task[].class, token.concat("tasks.task.list"), "POST",
+	    		 jsonTasksAccomplice, commonGson, 0, 0);
+	     
+		return tasks;
 	}
-
+	
+	private <T> void getInstanses (List<T> list,  Class<T[]> clazz, String url,
+			String method, StringEntity body, Gson gson, int index, int total) {
+		HttpRequestBase request;
+		if(method.equals("GET")) 
+			request = new HttpGet(url);
+		else {
+			request = new HttpPost(url);
+			((HttpPost) request).setEntity(body);
+		}
+		try (CloseableHttpResponse response = httpClient.execute(request)) {
+			if(response.getStatusLine().getStatusCode() != 200)
+				return;
+			String entity = gson.equals(usersGson) 
+					? EntityUtils.toString(response.getEntity()).toLowerCase()
+					: EntityUtils.toString(response.getEntity());
+			if(total == 0)
+				total = findTotalCounts(entity);
+			entity = entity.substring(entity.indexOf("["), entity.lastIndexOf("]") + 1);
+			list.addAll(Arrays.asList(gson.fromJson(entity, clazz)));
+			index += 50;
+			if(total > index) {
+				if(url.indexOf("?start=") != -1)
+					url = url.substring(0, url.lastIndexOf(String.valueOf(index - 50)));
+				else
+					url = url + "?start=";
+				getInstanses(list, clazz, url + index, method, body, gson, index, total);
+			}
+		} catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	}
+	
+	private int findTotalCounts(String entity) {
+		String totalStr = "0";
+		int index = 8;
+		while(totalStr.matches("[-+]?\\d+")) {
+			totalStr = entity.substring(entity.indexOf("total") + 7, entity.indexOf("total") + index);
+			index++;
+		}
+		return Integer.parseInt(totalStr.substring(0, totalStr.length()-1));
+	}
+	
 	public void testConnection(java.awt.event.ActionEvent evt, String token) {
 		token = token.trim().replace("profile", "");
 		if(!token.endsWith("/")) {
@@ -138,6 +200,7 @@ public class RestClient {
 		testButActionPerformed(evt, null);
 	}
 	
+	//TODO - place in resource bundle
 	private void testButActionPerformed(java.awt.event.ActionEvent evt, Worker worker) {
 		if (worker==null) {
 			JOptionPane.showMessageDialog(restConfigDialog, "Ошибка соединения!",
@@ -150,42 +213,5 @@ public class RestClient {
 			sub.append("</html>");
 			JOptionPane.showMessageDialog(restConfigDialog, sub.toString(), "Тест соединения", JOptionPane.INFORMATION_MESSAGE);
 		}
-	}
-	
-
-	public <T> void getInstanses (List<T> list,  Class<T[]> clazz, String url, String method, 
-			Object body, HttpHeaders headers, Gson gson, int index, int total) {
-		if(method.equals("GET")) {
-			HttpGet request = new HttpGet(url);
-			try (CloseableHttpResponse response = httpClient.execute(request)) {
-				if(response.getStatusLine().getStatusCode() != 200)
-					return;
-				String entity = EntityUtils.toString(response.getEntity()).toLowerCase();
-				if(total == 0)
-					total = findTotalCounts(entity);
-				entity = entity.substring(entity.indexOf("["), entity.lastIndexOf("]") + 1);
-				list.addAll(Arrays.asList(gson.fromJson(entity, clazz)));
-				index += 50;
-				if(total > index) {
-					if(url.indexOf("?start=") != -1)
-						url = url.substring(0, url.lastIndexOf(String.valueOf(index - 50)));
-					else
-						url = url + "?start=";
-					getInstanses(list, clazz, url + index, method, body, headers, gson, index, total);
-				}
-	        } catch (Exception e) {
-	        	e.printStackTrace();
-	        }
-		}
-	}
-	
-	private int findTotalCounts(String entity) {
-		String totalStr = "0";
-		int index = 8;
-		while(totalStr.matches("[-+]?\\d+")) {
-			totalStr = entity.substring(entity.indexOf("total") + 7, entity.indexOf("total") + index);
-			index++;
-		}
-		return Integer.parseInt(totalStr.substring(0, totalStr.length()-1));
 	}
 }

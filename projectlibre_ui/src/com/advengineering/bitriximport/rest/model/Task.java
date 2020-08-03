@@ -11,13 +11,13 @@ public class Task {
 	
 	private String decription;
 	
-	private Date createDate;
+	private Date createdDate;
 	
 	private Date startDatePlan;
 	
 	private Date endDatePlan;
 	
-	private String deadLine;
+	private String deadline;
 	
 	private List<Integer> accomplices;
 
@@ -45,12 +45,12 @@ public class Task {
 		this.decription = decription;
 	}
 
-	public Date getCreateDate() {
-		return createDate;
+	public Date getCreatedDate() {
+		return createdDate;
 	}
 
-	public void setCreateDate(Date createDate) {
-		this.createDate = createDate;
+	public void setCreatedDate(Date createdDate) {
+		this.createdDate = createdDate;
 	}
 
 	public Date getStartDatePlan() {
@@ -69,12 +69,12 @@ public class Task {
 		this.endDatePlan = endDatePlan;
 	}
 
-	public String getDeadLine() {
-		return deadLine;
+	public String getDeadline() {
+		return deadline;
 	}
 
-	public void setDeadLine(String deadLine) {
-		this.deadLine = deadLine;
+	public void setDeadline(String deadline) {
+		this.deadline = deadline;
 	}
 
 	public List<Integer> getAccomplices() {
@@ -84,5 +84,13 @@ public class Task {
 	public void setAccomplices(List<Integer> accomplices) {
 		this.accomplices = accomplices;
 	}
+
+	//TODO - to remove
+	@Override
+	public String toString() {
+		return "Задача id=" + id + ", title=" + title;
+	}
+	
+	
 
 }
