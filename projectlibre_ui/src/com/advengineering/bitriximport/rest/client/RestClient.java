@@ -102,7 +102,7 @@ public class RestClient {
 	}
 
 	public List<Worker> getWorkers() {
-		if(token==null)
+		if(token==null || token.equals(""))
 			return null;
 		List<Worker> workers = new ArrayList<>();
 		getInstanses(workers, Worker[].class, token.concat("user.get.json"), "GET",
